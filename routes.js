@@ -1,53 +1,72 @@
 import express from "express";
-import Person from "./models/Employee.js";
+import User from "./models/User.js";
+import bcrypt from "bcrypt";
+
+const saltRounds = 10;
+const myPlaintextPassword = "s0//P4$$w0rD";
+const someOtherPlaintextPassword = "not_bacon";
 
 const router = express.Router();
 
-const employeeDatabase = [
-  { id: "002003", firstName: "Thomas", lastName: "Kensah", grossSalary: 5000 },
-  { id: "002004", firstName: "john", lastName: "Samuel", grossSalary: 5050 },
-  { id: "002005", firstName: "Jerry", lastName: "Tims", grossSalary: 4000 },
-];
+// Admin Routes (Group)
+router.post("/auth/admin", async (request, response, next) => {
+  // Get login details
+  const email = request.body.email;
+  const password = request.body.password;
 
-// define routes
-router.post("/employees", (request, response, next) => {
-  const person = new Person({
-    firstName: request.body.firstName,
-    lastName: request.body.lastName,
-    gender: request.body.gender,
-    age: request.body.age,
+  // Find email in database
+  const userData = await User.find({ email: email }).exec();
+
+  bcrypt.genSalt(saltRounds, function (err, salt) {
+    bcrypt.hash(password, salt, function (err, hash) {
+      // Store hash in your password DB.
+      bcrypt.compare("pass1234", hash, function (err, result) {
+        console.log(result);
+      });
+    });
   });
 
-  person
-    .save()
-    .then(() => {
-      console.log("data saved");
-    })
-    .catch(() => {
-      console.log("could not save");
-    });
-
-  response.json(person);
+  // Compare passwords
+  // Send response
+  response.json({});
 });
 
-// Read Employees
-router.get("/employees", (request, response, next) => {
-  const employees = employeeDatabase;
-  response.json(employees);
-});
+// Employee Routes (Group)
 
-// Update Employee
-router.patch("/employees/:id", (request, response, next) => {});
+// General Routes (Group)
 
-// Delete Employee
-router.delete("/employees/:id", (request, response, next) => {});
+// // define routes
+// router.post("/employees", (request, response, next) => {
+//   const person = new Person({
+//     firstName: request.body.firstName,
+//     lastName: request.body.lastName,
+//     gender: request.body.gender,
+//     age: request.body.age,
+//   });
 
-router.get("/employees", (request, response, next) => {
-  // fetch all employees from database
-  const employees = employeeDatabase;
-  // return employees as a JSON array
-  response.json(employees);
-});
+//   person
+//     .save()
+//     .then(() => {
+//       console.log("data saved");
+//     })
+//     .catch(() => {
+//       console.log("could not save");
+//     });
+
+//   response.json(person);
+// });
+
+// // Read Employees
+// router.get("/employees", (request, response, next) => {
+//   const employees = employeeDatabase;
+//   response.json(employees);
+// });
+
+// // Update Employee
+// router.patch("/employees/:id", (request, response, next) => {});
+
+// // Delete Employee
+// router.delete("/employees/:id", (request, response, next) => {});
 
 // 404
 router.use((request, response) => {
