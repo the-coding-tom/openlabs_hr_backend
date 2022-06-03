@@ -4,10 +4,6 @@ import bcrypt from "bcrypt";
 import { verifyToken } from "./middleware/tokenizer.js";
 import jwt from "jsonwebtoken";
 
-const saltRounds = 10;
-const myPlaintextPassword = "s0//P4$$w0rD";
-const someOtherPlaintextPassword = "not_bacon";
-
 const router = express.Router();
 
 // Admin Routes (Group)
@@ -48,6 +44,8 @@ router.post("/auth/admin", async (request, response, next) => {
       "User email does not exist. Please check the email entered.";
     response.status(404).json(returnData);
   }
+
+  // const saltRounds = 10;
 
   // bcrypt.genSalt(saltRounds, function (err, salt) {
   //   bcrypt.hash(password, salt, function (err, hash) {
