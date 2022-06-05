@@ -9,7 +9,7 @@ const administrator = mongoose.Schema({
 });
 
 const organisationSchema = mongoose.Schema({
-  BusinessName: {
+  businessName: {
     type: String,
     required: true, // Always require user id to be present
   },
