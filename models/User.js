@@ -1,11 +1,8 @@
 import mongoose from "mongoose";
+import bcrypt from "bcrypt";
 
 // Profile Schema
 const userProfileSchema = mongoose.Schema({
-  userID: {
-    type: String,
-    required: true,
-  },
   firstName: {
     type: String,
     required: true,
@@ -53,4 +50,17 @@ const userSchema = mongoose.Schema({
   profile: userProfileSchema,
 });
 
+userSchema.pre("save", async function (next) {
+  try {
+    // do stuff
+    const saltRounds = 10;
+    // const salt = await bcrypt.genSalt(saltRounds);
+    const hash = await bcrypt.hash(this.password, saltRounds);
+    // Store hash in your password DB.
+    this.password = hash;
+    next();
+  } catch (exception) {
+    console.log(exception);
+  }
+});
 export default mongoose.model("User", userSchema);

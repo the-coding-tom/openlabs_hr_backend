@@ -17,6 +17,7 @@ const organisationSchema = mongoose.Schema({
     type: String,
     required: true, // Always require organisation id to be present
   },
+  operationalStatus: { type: String, required: true },
   administrators: {
     type: [administrator],
   },

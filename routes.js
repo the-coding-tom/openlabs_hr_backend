@@ -64,21 +64,71 @@ router.post("/auth/admin", async (request, response, next) => {
 });
 
 router.post("/auth/onboard-company", async (request, response, next) => {
+  //
+  const data = new Response();
   // Get Organization & Admin Details
+  const businessName = request.body.businessName;
+  const registrationNumber = request.body.registrationNumber;
+  const adminEmail = request.body.adminEmail;
+  const adminPassword = request.body.adminPassword;
+  const adminFirstName = request.body.firstName;
+  const adminLastName = request.body.lastName;
+
   // Find Organization by registration number
-  // Exit onboarding if organization already exists
-  // Create new organization
-  // Add branch details
-  // Add user details
-  // Add admin details
-  // Send response.
-  // const saltRounds = 10;
-  // bcrypt.genSalt(saltRounds, function (err, salt) {
-  //   bcrypt.hash(password, salt, function (err, hash) {
-  //     // Store hash in your password DB.
-  //     console.log(hash);
-  //   });
-  // });
+  const organizationDetails = await Organisation.findOne({
+    registrationNumber,
+  }).exec();
+
+  // Exit registration
+  if (organizationDetails) {
+    data.message =
+      "An organization already exists with this registration number.";
+    return response.status(400).json(data);
+  }
+
+  // Find existing user
+  const userData = await User.findOne({
+    email: adminEmail,
+  }).exec();
+
+  // No existing user
+  if (!userData) {
+    try {
+      const userData = new User({
+        email: adminEmail,
+        password: adminPassword,
+        profile: {
+          firstName: adminFirstName,
+          lastName: adminLastName,
+        },
+      });
+      await userData.save();
+    } catch (exception) {
+      data.message = "Failed to create user record.";
+      response.status(400).json(data);
+    }
+  }
+
+  try {
+    // New organization
+    const organisation = new Organisation({
+      businessName: businessName,
+      registrationNumber: registrationNumber,
+      operationalStatus: "pending-approval",
+      administrators: [
+        {
+          userID: userData._id,
+        },
+      ],
+    });
+    await organisation.save();
+
+    data.message = "Onboarding successful. Please check your email.";
+    response.status(200).json(data);
+  } catch (exception) {
+    data.message = "Failed to onboard organization.";
+    response.status(400).json(data);
+  }
 });
 
 router.post("/auth/employee", async (request, response, next) => {
