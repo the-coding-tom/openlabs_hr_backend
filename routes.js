@@ -168,8 +168,22 @@ router.post("/auth/employee", async (request, response, next) => {
   }
 });
 
-router.patch("/user/:userId/profile", async (request, response, next) => {
+router.patch("/user/profile", verifyToken, async (request, response, next) => {
   //
+  const data = new Response();
+  // Get update data from request.
+  const userId = request.body.userId;
+  const firstName = request.body.firstName;
+  const lastName = request.body.lastName;
+  // Find member account.
+  const userData = await User.findByIdAndUpdate(userId, {
+    "profile.firstName": firstName,
+    "profile.lastName": lastName,
+  });
+  // Response
+  data.message = "User update successfull";
+  data.data = await User.findById(userId).exec();
+  response.status(200).json(data);
 });
 
 // 404
